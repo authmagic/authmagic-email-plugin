@@ -1,26 +1,28 @@
 const nodemailer = require('nodemailer');
-const {isTest, url, mailer} = require('./config');
+const swig = require('swig');
+const striptags = require('striptags');
+const {isTest, url, mailer, from, subject} = require('./config');
 
 function sendEmail({mailer, url, z, config, user, params}) {
   const transporter = nodemailer.createTransport(mailer);
   const link = `${url}${config.checkUrl.replace('${z}', encodeURIComponent(z))}`;
   const mailOptions = {
-    from: 'AuthMagic',
     to: user,
-    subject: 'Your Magic Link',
-    text: `Hi friend! Open this link to finish authorization: ${link}`,
-    html: `Hi friend! Open this link to finish authorization: <a href="${link}">${link}</a>`,
+    html: swig.renderFile(__dirname + '/static/template.html', {link, user, params}),
+    text: striptags(swig.renderFile(__dirname + '/static/nohtml-template.html', {link, user, params})),
+    from,
+    subject,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return console.log(error);
-    }
-
-    console.log('Message sent: %s', info.messageId);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  })
-  ;
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(info);
+      }
+    });
+  });
 }
 
 module.exports = function ({user, params, z, config}) {
@@ -28,10 +30,16 @@ module.exports = function ({user, params, z, config}) {
     // see https://nodemailer.com/about/
     nodemailer.createTestAccount((err, auth) => {
       if (!err) {
-        sendEmail({mailer: {...mailer, auth}, url, z, config, user, params});
+        sendEmail({mailer: {...mailer, auth}, url, z, config, user, params})
+          .then((info) => {
+            console.log('Message sent: %s', info.messageId);
+            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+          })
+          .catch(console.log);
+
       }
     });
   } else {
-    sendEmail({mailer, url, z, config, user, params});
+    sendEmail({mailer, url, z, config, user, params}).catch(console.log);
   }
 };
