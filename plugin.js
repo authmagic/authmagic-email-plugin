@@ -1,17 +1,10 @@
 const nodemailer = require('nodemailer');
-const {isTest, host, port, secure, user, pass, url} = require('./config');
+const {isTest, url, mailer} = require('./config');
 
-function sendEmail({host, port, secure, user, pass, url, z, checkUrl}) {
-    const transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure,
-        auth: {user, pass},
-    });
-
-    const link = `${url}${checkUrl.replace('${z}', encodeURIComponent(z))}`;
-
-    let mailOptions = {
+function sendEmail({mailer, url, z, config, user, params}) {
+    const transporter = nodemailer.createTransport(mailer);
+    const link = `${url}${config.checkUrl.replace('${z}', encodeURIComponent(z))}`;
+    const mailOptions = {
         from: 'AuthMagic',
         to: user,
         subject: 'Your Magic Link',
@@ -26,19 +19,19 @@ function sendEmail({host, port, secure, user, pass, url, z, checkUrl}) {
 
         console.log('Message sent: %s', info.messageId);
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    });
+    })
+    ;
 }
 
-module.exports = async function({user, params, z, config: {checkUrl}}) {
-	if(isTest) {
+module.exports = function ({user, params, z, config}) {
+    if (isTest) {
         // see https://nodemailer.com/about/
-        nodemailer.createTestAccount((err, {user, pass}) => {
-            if(!err) {
-                sendEmail({host, port, secure, user, pass, url, z, checkUrl});
+        nodemailer.createTestAccount((err, auth) => {
+            if (!err) {
+                sendEmail({mailer: {...mailer, auth}, url, z, config, user, params});
             }
         });
-	}
-
-
-
+    } else {
+        sendEmail({mailer, url, z, config, user, params});
+    }
 };
