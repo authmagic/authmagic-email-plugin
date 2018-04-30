@@ -7,7 +7,6 @@ const striptags = require('striptags');
 
 const sendEmail = async function({z, config, pluginConfig, user, params}) {
   const transporter = nodemailer.createTransport(pluginConfig.mailer);
-  console.log(arguments[0]);
   const link = nunjucks.renderString(pluginConfig.link, arguments[0]);
   const htmlTemplatePath = './static/authmagic-email/template.html';
   const nohtmlTemplatePath = './static/authmagic-email/nohtml-template.html';
@@ -23,7 +22,7 @@ const sendEmail = async function({z, config, pluginConfig, user, params}) {
 
 module.exports = function ({user, params, z, config:iconfig}) {
   const config = Object.assign({}, iconfig, {params: undefined, plugins: undefined});
-  const pluginConfig = iconfig ? iconfig.params ? iconfig.params['authmagic-email'] : null : null;
+  const pluginConfig = iconfig ? iconfig.params ? iconfig.params['authmagic-email-plugin'] : null : null;
   if (pluginConfig.isTest) {
     // see https://nodemailer.com/about/
     nodemailer.createTestAccount((err, auth) => {
