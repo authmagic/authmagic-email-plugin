@@ -1,34 +1,34 @@
+const _ = require('lodash');
 const nodemailer = require('nodemailer');
-const swig = require('swig');
-const fs = require('fs');
+const nunjucks = require('nunjucks');
+nunjucks.configure({ autoescape: true });
 const {promisify} = require('util');
 const striptags = require('striptags');
-const {isTest, url, mailer, from, subject} = require('./config');
 
-const existsAsync = promisify(fs.exists);
-const sendEmail = async function({mailer, url, z, config, user, params}) {
-  const transporter = nodemailer.createTransport(mailer);
-  const link = `${url}${config.checkUrl.replace('${z}', encodeURIComponent(z))}`;
-  const htmlTemplatePath = (await existsAsync('./static_custom/authmagic-email/template.html')) ?
-    './static_custom/authmagic-email/template.html' : __dirname + '/static/template.html';
-  const nohtmlTemplatePath = (await existsAsync('./static_custom/authmagic-email/nohtml-template.html')) ?
-    './static_custom/authmagic-email/nohtml-template.html' : __dirname + '/static/nohtml-template.html';
+const sendEmail = async function({z, config, pluginConfig, user, params}) {
+  const transporter = nodemailer.createTransport(pluginConfig.mailer);
+  console.log(arguments[0]);
+  const link = nunjucks.renderString(pluginConfig.link, arguments[0]);
+  const htmlTemplatePath = './static/authmagic-email/template.html';
+  const nohtmlTemplatePath = './static/authmagic-email/nohtml-template.html';
   const mailOptions = {
-    text: striptags(swig.renderFile(nohtmlTemplatePath, {link, user, params})),
-    html: swig.renderFile(htmlTemplatePath, {link, user, params}),
+    text: striptags(nunjucks.render(nohtmlTemplatePath, {link, user, params})),
+    html: nunjucks.render(htmlTemplatePath, {link, user, params}),
     to: user,
-    subject,
-    from,
+    subject: pluginConfig.subject,
+    from: pluginConfig.from,
   };
   return promisify(transporter.sendMail).call(transporter, mailOptions);
 };
 
-module.exports = function ({user, params, z, config}) {
-  if (isTest) {
+module.exports = function ({user, params, z, config:iconfig}) {
+  const config = Object.assign({}, iconfig, {params: undefined, plugins: undefined});
+  const pluginConfig = iconfig ? iconfig.params ? iconfig.params['authmagic-email'] : null : null;
+  if (pluginConfig.isTest) {
     // see https://nodemailer.com/about/
     nodemailer.createTestAccount((err, auth) => {
       if (!err) {
-        sendEmail({mailer: {...mailer, auth}, url, z, config, user, params})
+        sendEmail({z, config, pluginConfig: _.merge(pluginConfig, {mailer: {auth}}), user, params})
           .then((info) => {
             console.log('Message sent: %s', info.messageId);
             console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
@@ -37,6 +37,6 @@ module.exports = function ({user, params, z, config}) {
       }
     });
   } else {
-    sendEmail({mailer, url, z, config, user, params}).catch(console.log);
+    sendEmail({z, config, pluginConfig, user, params}).catch(console.log);
   }
 };
