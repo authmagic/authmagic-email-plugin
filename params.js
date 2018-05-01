@@ -1,4 +1,4 @@
-{
+module.exports = {
   "isTest": true,
   "url": "http://localhost:3000",
   "mailer": {
@@ -8,9 +8,9 @@
     },
     "host": "smtp.ethereal.email",
     "port": 587,
-    "secure": true
+    "secure": false
   },
   "from": "AuthMailer",
   "subject": "Your Magic Link",
-  "link": "{{pluginConfig.url}}/key/verify/{{encodeURIComponent(z)}}"
-}
+  "link": "{{pluginConfig.url}}/check.html?ekey={{ekey | urlencode}}"
+};
