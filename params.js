@@ -11,6 +11,5 @@ module.exports = {
     "secure": false
   },
   "from": "AuthMailer",
-  "subject": "Your Magic Link",
-  "link": "{{pluginConfig.url}}/check.html?ekey={{ekey | urlencode}}"
+  "subject": "Your Magic Link"
 };

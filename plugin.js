@@ -7,12 +7,11 @@ const striptags = require('striptags');
 
 const sendEmail = async function({ekey, config, pluginConfig, user, params}) {
   const transporter = nodemailer.createTransport(pluginConfig.mailer);
-  const link = nunjucks.renderString(pluginConfig.link, arguments[0]);
   const htmlTemplatePath = './static/authmagic-email/template.html';
   const nohtmlTemplatePath = './static/authmagic-email/nohtml-template.html';
   const mailOptions = {
-    text: striptags(nunjucks.render(nohtmlTemplatePath, {link, user, params})),
-    html: nunjucks.render(htmlTemplatePath, {link, user, params}),
+    text: striptags(nunjucks.render(nohtmlTemplatePath, arguments[0])),
+    html: nunjucks.render(htmlTemplatePath, arguments[0]),
     to: user,
     subject: pluginConfig.subject,
     from: pluginConfig.from,
