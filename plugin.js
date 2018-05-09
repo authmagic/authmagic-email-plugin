@@ -5,7 +5,7 @@ nunjucks.configure({ autoescape: true });
 const {promisify} = require('util');
 const striptags = require('striptags');
 
-const sendEmail = async function({ekey, config, pluginConfig, user, params}) {
+const sendEmail = async function({pluginConfig, user}) {
   const transporter = nodemailer.createTransport(pluginConfig.mailer);
   const htmlTemplatePath = './static/authmagic-email/template.html';
   const nohtmlTemplatePath = './static/authmagic-email/nohtml-template.html';
@@ -19,14 +19,13 @@ const sendEmail = async function({ekey, config, pluginConfig, user, params}) {
   return promisify(transporter.sendMail).call(transporter, mailOptions);
 };
 
-module.exports = function ({user, params, ekey, config:iconfig}) {
+module.exports = function ({user, redirectUrl, params, ekey, config:iconfig}) {
   const config = Object.assign({}, iconfig, {params: undefined, plugins: undefined});
   const pluginConfig = iconfig ? iconfig.params ? iconfig.params['authmagic-email-plugin'] : null : null;
   if (pluginConfig.isTest) {
-    // see https://nodemailer.com/about/
     nodemailer.createTestAccount((err, auth) => {
       if (!err) {
-        sendEmail({ekey, config, pluginConfig: _.merge(pluginConfig, {mailer: {auth}}), user, params})
+        sendEmail({ekey, config, pluginConfig: _.merge(pluginConfig, {mailer: {auth}}), user, redirectUrl, params})
           .then((info) => {
             console.log('Message sent: %s', info.messageId);
             console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
@@ -35,6 +34,6 @@ module.exports = function ({user, params, ekey, config:iconfig}) {
       }
     });
   } else {
-    sendEmail({ekey, config, pluginConfig, user, params}).catch(console.log);
+    sendEmail({ekey, config, pluginConfig, user, redirectUrl, params}).catch(console.log);
   }
 };

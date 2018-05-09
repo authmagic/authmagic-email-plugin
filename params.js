@@ -1,6 +1,5 @@
 module.exports = {
   "isTest": true,
-  "url": "http://localhost:3000",
   "mailer": {
     "auth": {
       "user": "",
