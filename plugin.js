@@ -20,7 +20,7 @@ const sendEmail = async function({pluginConfig, user}) {
 };
 
 module.exports = function ({user, redirectUrl, params, ekey, config:iconfig}) {
-  const config = Object.assign({}, iconfig, {params: undefined, plugins: undefined});
+  const config =  _.omit(iconfig, ['params', 'plugins']);
   const pluginConfig = iconfig ? iconfig.params ? iconfig.params['authmagic-email-plugin'] : null : null;
   if (pluginConfig.isTest) {
     nodemailer.createTestAccount((err, auth) => {
