@@ -34,3 +34,7 @@ How it looks in the real world:
 
 <img src="https://github.com/authmagic/authmagic/blob/master/docs/images/medium-example1.png?raw=true" width="600px"/>
 <img src="https://github.com/authmagic/authmagic/blob/master/docs/images/medium-confirm.png?raw=true" width="600px"/>
+
+Licence
+-----------
+authmagic-email-plugin [MIT licensed](./LICENSE).
