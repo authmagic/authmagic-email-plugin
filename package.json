@@ -8,7 +8,7 @@
   },
   "keywords": ["auth", "authentication", "authorization", "openid", "oauth2", "email", "smtp"],
   "author": "Oleksandr Knyga <oleksandrknyga@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.10",
     "nodemailer": "^4.6.4",
