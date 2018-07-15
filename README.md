@@ -37,4 +37,4 @@ How it looks in the real world:
 
 Licence
 -----------
-authmagic-email-plugin [MIT licensed](./LICENSE).
+authmagic-email-plugin is [MIT licensed](./LICENSE).
